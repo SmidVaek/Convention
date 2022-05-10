@@ -1,0 +1,100 @@
+﻿@page "/"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authentication
+@using Conventions.Models
+@using Conventions.Services.TypedClients
+
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject BlazorAccessTokenProvider _tokenProvider
+@inject UserClient _userClient;
+@inject ProfileClient _profileClient;
+
+@attribute [AllowAnonymous]
+
+<PageTitle>Index</PageTitle>
+
+<h1>Welcome</h1>
+    
+<AuthorizeView Policy="@Policies.IsAdmin">
+    <NotAuthorized>
+        <p>Click <a href="login">here</a> to login.</p>        
+    </NotAuthorized>
+    <Authorized >
+        <Row>
+            <Column>
+                <h3>ClaimsPrincipal Data</h3>
+            </Column>
+        </Row>
+        <Row>
+            <Column>
+                <Button Color="Color.Primary" @onclick="GetClaimsPrincipalData">Get ClaimsPrincipal Data</Button>
+                @if (_claims.Count() > 0)
+                {
+                    <ul>
+                        @foreach (var claim in _claims)
+                        {
+                            <li>@claim.Type: @claim.Value</li>
+                        }
+                    </ul>
+                }
+            </Column>
+        </Row>
+        <Row>
+            <Column>
+                <p>@_accessToken</p>
+            </Column>
+        </Row>
+        <Row>
+
+        </Row>
+        <Row>
+            <Button Color="Color.Success" @onclick="GetUserFromApi">Load from API</Button>
+        </Row>
+        <Row>
+            @if (_user is not null)
+            {
+                <h4>@_user.Name</h4>
+                <h5>@_user.Id</h5>
+                <ul>
+                    <li>@_user.Email</li>
+                    <li>@_user.Address</li>
+                    <li>@_user.Password</li>
+                    <li>@_user.PhoneNumber</li>
+                    <li>@String.Join(',', _user.Roles)</li>
+                </ul>
+            }
+        </Row>
+    </Authorized>
+</AuthorizeView>
+
+
+@code {
+    private string _accessToken = string.Empty;
+    private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+    private User? _user = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetClaimsPrincipalData();
+    }
+
+    private async Task GetUserFromApi()
+    {
+        _user = null;
+        _user = await _profileClient.Get();
+    }
+
+    private async Task GetClaimsPrincipalData()
+    {     
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        _accessToken = _tokenProvider.AccessToken;
+        var user = authState.User;
+
+        if (user?.Identity?.IsAuthenticated ?? false)
+        {
+            _claims = user.Claims;
+        }
+    }
+}

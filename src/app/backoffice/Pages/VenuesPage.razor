@@ -1,0 +1,80 @@
+﻿
+@page "/venues"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authentication
+@using Conventions.Services.TypedClients
+@inject VenueClient _client;
+
+<AuthorizeView Policy=@Policies.IsAdmin>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+    <Authorized>
+        <PageTitle>Venues</PageTitle>
+            <h3>Venues</h3>
+            <Button Color="Color.Secondary" Clicked="@Reload">Refresh</Button>
+            <Button Color="Color.Primary" Clicked="@ShowModal">Create</Button>
+
+            @if(_items == null) {
+                <p>Loading...</p>
+            }
+            else {
+                @if (_items.Count() > 0)
+                {   
+                    <ul>
+                    @foreach (var item in _items)
+                    {
+                        <li>@item.Id:@item.Name <a @onclick="() => Delete(item)">Remove</a></li>
+                    }
+                    </ul>
+                }
+                else
+                {
+                    <p>No venues found.</p>
+                }
+            }
+
+        <Modal @ref="modalRef">
+            <ModalContent Centered>
+                <CreateVenue Finished="@HideModal" Client="@_client" />
+            </ModalContent>
+        </Modal>
+    </Authorized>
+</AuthorizeView>
+
+
+
+@code {
+    private IEnumerable<Conventions.Models.Venue>? _items = null;
+    private Modal modalRef;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        _items = null;
+        _items = await _client.GetVenuesAsync();   
+    }
+
+    private async Task Delete(Conventions.Models.Venue item)
+    {
+        await Task.CompletedTask;
+        Console.WriteLine(item.Id);
+    }
+
+        private Task ShowModal()
+    {
+        return modalRef.Show();
+    }
+
+    private Task HideModal()
+    {
+        return modalRef.Hide();
+    }
+}

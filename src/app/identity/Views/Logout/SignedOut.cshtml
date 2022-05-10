@@ -1,0 +1,41 @@
+﻿@addTagHelper "*, Microsoft.AspNetCore.Mvc.TagHelpers"
+@using Conventions.Identity.Controllers
+@using Conventions.Identity.Models
+
+@model Conventions.Identity.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" 
+          content="default-src 'none';
+                   script-src 'self';
+                   style-src 'self';
+                   connect-src 'self';
+                   font-src 'self';
+                   form-action 'self';
+                   img-src 'self';
+                   frame-ancestors 'self';
+                   frame-src 'self'">
+    <link rel="icon" type="image/png" href="~/favicon.png" />
+    <link href="~/css/bootstrap/bootstrap.min.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true">
+
+    <title>@ViewBag.Title</title>
+</head>
+<body class="bg-dark">
+    <div class="container d-flex flex-column min-vh-100 justify-content-center align-items-center row">
+        <div class="col-sm-12 col-md-8 col-lg-6 bg-light">
+            <div class="row h-100 p-3">
+                <h1>Signed out</h1>
+                <p>You can not close this window.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

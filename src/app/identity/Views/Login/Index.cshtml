@@ -1,0 +1,72 @@
+﻿@addTagHelper "*, Microsoft.AspNetCore.Mvc.TagHelpers"
+@using Conventions.Identity.Controllers
+@using Conventions.Identity.Models
+
+@model Conventions.Identity.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'none';
+                script-src 'self';
+                style-src 'self';
+                connect-src 'self';
+                font-src 'self';
+                form-action 'self';
+                img-src 'self';
+                frame-ancestors 'self';
+                frame-src 'self'">
+    <link rel="icon" type="image/png" href="~/favicon.png" />
+    <link href="~/css/bootstrap/bootstrap.min.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true">
+
+    <title>@ViewBag.Title</title>
+</head>
+<body class="bg-dark">
+    <div class="container d-flex flex-column min-vh-100 justify-content-center align-items-center">
+        <div class="col-sm-12 col-md-8 col-lg-6 bg-light">
+            <div class="row h-100 p-3">
+                <form asp-controller="Login" method="post">
+                    @Html.HiddenFor(x=>x.ReturnUrl)
+                    <h2>Convention IDP</h2>
+                    <div class="mb-4">
+                        <label class="form-label" asp-for="Username">Email</label>
+                        <input asp-for="Username" class="form-control" type="email" id="email" autocomplete="username" required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label" asp-for="Password"></label>
+                        <input asp-for="Password" class="form-control" type="password" id="current-password" autocomplete="current-password" required />
+                    </div>
+                    <div class="mb-4">
+                        <input asp-for="RememberMe" class="form-check-input" type="checkbox" />
+                        <label class="form-check-label" asp-for="RememberMe">Remember Me</label>
+                    </div>
+                    @if (!ViewContext.ViewData.ModelState.IsValid &&
+                        (ViewContext.ViewData.ModelState.ContainsKey(nameof(Model.Password)) &&
+                        ViewContext.ViewData.ModelState[nameof(Model.Password)]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid) ||
+                        (ViewContext.ViewData.ModelState.ContainsKey(nameof(Model.Username)) &&
+                        ViewContext.ViewData.ModelState[nameof(Model.Username)]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid))
+                    {
+                        <div class="mb-4">
+                            <div class="p-2 bg-warning full-width d-flex">
+                                <span class="mx-auto text-dark invalid" asp-validation-for="Password"></span>
+                            </div>
+                        </div>
+                    }
+                    <div>
+                        <div class="col-12">
+                            <input type="submit" class="btn btn-primary" value="Login" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

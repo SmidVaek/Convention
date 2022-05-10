@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>3b138d36-09f6-4c98-815f-aab8b235f662</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IdentityModel" Version="6.0.0" />
+    <PackageReference Include="Joonasw.AspNetCore.SecurityHeaders" Version="4.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.4" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\lib\models\Conventions.Models.csproj" />
+    <ProjectReference Include="..\..\lib\services\Conventions.Services.csproj" />
+    <ProjectReference Include="..\..\lib\storage.mongo\Conventions.Storage.Mongo.csproj" />
+    <ProjectReference Include="..\..\lib\storage\Conventions.Storage.csproj" />
+  </ItemGroup>
+
+</Project>

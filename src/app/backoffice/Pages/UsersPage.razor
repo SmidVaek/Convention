@@ -1,0 +1,61 @@
+﻿
+@page "/users"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authentication
+@using Conventions.Services.TypedClients
+@inject UserClient _client;
+
+<AuthorizeView Policy=@Policies.IsAdmin>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+    <Authorized>
+        <PageTitle>Users</PageTitle>
+            <h3>Users</h3>
+            <button class="btn btn-primary" @onclick="Reload">Refresh</button>
+
+            @if(_items == null) {
+                <p>Loading...</p>
+            }
+            else {
+                @if (_items.Count() > 0)
+                {   
+                    <ul>
+                    @foreach (var item in _items)
+                    {
+                        <li>@item.Id:@item.Email <a @onclick="() => Delete(item)">Remove</a></li>
+                    }
+                    </ul>
+                }
+                else
+                {
+                    <p>No users found.</p>
+                }
+            }
+    </Authorized>
+</AuthorizeView>
+
+
+
+@code {
+    private IEnumerable<Conventions.Models.User>? _items = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        _items = null;
+        _items = await _client.GetUsersAsync();   
+    }
+
+    private async Task Delete(Conventions.Models.User item)
+    {
+        await Task.CompletedTask;
+        Console.WriteLine(item.Id);
+    }
+}

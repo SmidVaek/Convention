@@ -1,0 +1,118 @@
+﻿
+@page "/conventions"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authentication
+@using Conventions.Services.TypedClients
+
+@inject ConventionClient _client;
+
+<AuthorizeView Policy=@Policies.IsAdmin>
+    <NotAuthorized>
+        <RedirectToLogin />
+    </NotAuthorized>
+    <Authorized>
+        <PageTitle>Conventions</PageTitle>
+
+            <h3>Conventions</h3>
+            <Button Color=Color.Primary @onclick="Reload">Refresh</Button>
+        @if(_items == null)
+        {
+            <p>LOADING ...</p>
+        }
+        else {
+            @if(_items.Count() > 0)
+            {
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHeaderCell>Id</TableHeaderCell>
+                            <TableHeaderCell>Name</TableHeaderCell>
+                            <TableHeaderCell></TableHeaderCell>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        @foreach (var item in _items)
+                        {
+                            <TableRow>
+                                <TableRowCell>@item.Id</TableRowCell>
+                                <TableRowCell>@item.Name</TableRowCell>
+                                <TableRowCell>
+                                    <Button Color=Color.Danger @onclick="() => Delete(item)">Remove</Button>
+                                    <Button Color=Color.Info @onclick="() => ShowDetailsModal(item)">Details</Button>
+                                </TableRowCell>
+                            </TableRow>
+                        }
+                    </TableBody>
+                </Table>
+            }
+            else
+            {
+                <p>No conventions found.</p>
+            }
+        }
+
+        <Button Color="Color.Primary" Clicked="@ShowCreateModal">Create</Button>
+
+        <Modal @ref="createModalRef">
+            <ModalContent Centered>
+                <CreateConvention Finished="@HideCreateModal" Client="@_client" />
+            </ModalContent>
+        </Modal>
+
+        <Modal @ref="detailsModalRef">
+            <ModalContent Centered>
+                <DetailsConvention Finished="@HideDetailsModal" Client="@_client" Convention="@_selectedConvention" />
+            </ModalContent>
+        </Modal>
+    </Authorized>
+</AuthorizeView>
+
+
+
+@code {
+    private IEnumerable<Conventions.Models.Convention>? _items = null;
+    private Modal createModalRef;
+    private Modal detailsModalRef;
+    private Conventions.Models.Convention _selectedConvention = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Reload();
+    }
+
+    private async Task Reload()
+    {
+        _items = null;
+        _items = await _client.GetConventions();   
+    }
+
+    private async Task Delete(Conventions.Models.Convention convention)
+    {
+        await _client.DeleteConvention(convention.Id);
+        await Reload();
+    }
+
+    private Task ShowCreateModal()
+    {
+        return createModalRef.Show();
+    }
+
+    private Task HideCreateModal()
+    {
+        return createModalRef.Hide();
+    }
+
+    private Task ShowDetailsModal(Conventions.Models.Convention convention)
+    {
+        _selectedConvention = convention;
+        return detailsModalRef.Show();
+    }
+
+    private Task HideDetailsModal()
+    {
+        _selectedConvention = null;
+        return detailsModalRef.Hide();
+    }
+}

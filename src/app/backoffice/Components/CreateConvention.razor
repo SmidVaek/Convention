@@ -1,0 +1,37 @@
+﻿@using Conventions.Services.TypedClients
+
+<EditForm OnSubmit="@OnFormSubmitAsync" Model="@_convention">
+    <ModalHeader>
+        <ModalTitle>New Convention</ModalTitle>
+        <CloseButton />
+    </ModalHeader>
+    <ModalBody>
+        <Div>
+            <Row>
+                <Column>
+                    <Label For="name">Name</Label>
+                    <InputText id="name" @bind-Value="_convention.Name"></InputText>
+                </Column>
+            </Row>
+        </Div>
+    </ModalBody>
+    <ModalFooter>
+        <Button Color="Color.Primary" Type="ButtonType.Submit">Submit</Button>
+    </ModalFooter>
+</EditForm>           
+
+@code {
+    private Conventions.Models.Convention _convention = new();
+
+    [Parameter]
+    public EventCallback Finished { get; set; }
+
+    [Parameter]
+    public ConventionClient Client { get; set; } = null!;
+
+    private async Task OnFormSubmitAsync()
+    {
+        var newConvention = await Client.AddConvention(_convention);
+        await Finished.InvokeAsync();
+    }
+}

@@ -1,0 +1,10 @@
+﻿@inject NavigationManager _navManager
+
+<div></div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        _navManager.NavigateTo("", true);
+    }
+}

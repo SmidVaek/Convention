@@ -1,0 +1,129 @@
+﻿@using Conventions.Services.TypedClients
+
+@inject EventClient _eventClient
+@inject VenueClient _venueClient
+
+@if (Convention != null)
+{
+    <Div>
+        <ModalHeader>
+            <ModalTitle>Convention Details</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Div>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is12">
+                        <Label For="name">@Convention.Name</Label>
+                    </Column>
+                </Row>
+                <Row>
+                    <Column ColumnSize="ColumnSize.Is8">
+                        <Label For="events">Events</Label>
+                        @if (_events.Count() > 0)
+                        {
+                            <Select id="events" TValue="string" SelectedValue="@_selectedEventId" SelectedValueChanged="@OnSelectedValueChanged">
+                            @foreach (var e in _events)
+                            {
+                                <SelectItem Value="@e.Id">@e.Name</SelectItem>
+                            }
+                        </Select>
+                        }
+                        else {
+                            <p>No Events defined.</p>
+                        }
+                    </Column>
+                    <Column ColumnSize="ColumnSize.Is4">
+                        <Button Color="Color.Primary" @onclick="() => { AssociateEvent(_selectedEventId); }">Associate</Button>
+                    </Column>
+                </Row>
+            </Div>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Primary" Type="ButtonType.Submit">Submit</Button>
+        </ModalFooter>
+    </Div>
+}
+
+@code {
+    [Parameter]
+    public Conventions.Models.Convention Convention { get; set; }
+
+    [Parameter]
+    public EventCallback Finished { get; set; }
+
+    [Parameter]
+    public ConventionClient Client { get; set; } = null!;
+
+    private IEnumerable<Conventions.Models.Venue> _associatedVenues = Array.Empty<Conventions.Models.Venue>();
+    private IEnumerable<Conventions.Models.Venue> _venues = Array.Empty<Conventions.Models.Venue>();
+
+    private IEnumerable<Conventions.Models.Event> _associatedEvents = Array.Empty<Conventions.Models.Event>();
+    private IEnumerable<Conventions.Models.Event> _events = Array.Empty<Conventions.Models.Event>();
+
+    string _selectedVenueId;
+    string _selectedEventId;
+
+    Task OnSelectedValueChanged( string value )
+    {
+        _selectedEventId = value;
+        Console.WriteLine( _selectedEventId );
+
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Convention is not null)
+        {
+            await Task.WhenAll(new Task[] { LoadVenues(), LoadEvents() });
+        }
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task LoadVenues()
+    {
+        var associatedVenuesTask = Client.GetConventionVenues(Convention.Id);
+        var allVenuesTask = _venueClient.GetVenuesAsync();
+
+        await Task.WhenAll(new Task[] { associatedVenuesTask, allVenuesTask });
+
+        _associatedVenues = associatedVenuesTask.Result;
+        _venues = allVenuesTask.Result;
+    }
+
+    private async Task LoadEvents()
+    {
+        var associatedEventsTask = Client.GetConventionEvents(Convention.Id);
+        var allEventsTask = _eventClient.GetEventsAsync();
+
+        await Task.WhenAll(new Task[] { associatedEventsTask, allEventsTask });
+
+        _associatedEvents = associatedEventsTask.Result;
+        _events = allEventsTask.Result;    
+    }
+
+    private async Task AssociateVenue(string venueId)
+    {
+        await Client.AssociateVenue(Convention.Id, venueId);
+        await LoadVenues();
+    }
+
+    private async Task DisassociateVenue(string venueId)
+    {
+        await Client.DisassociateVenue(Convention.Id, venueId);
+        await LoadVenues();
+    }
+
+    private async Task AssociateEvent(string eventId)
+    {
+        await Client.AssociateEvent(Convention.Id, eventId);
+        await LoadEvents();
+    }
+
+    private async Task DisassociateEvent(string eventId)
+    {
+        await Client.DisassociateEvent(Convention.Id, eventId);
+        await LoadEvents();
+    }
+}

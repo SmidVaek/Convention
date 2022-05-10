@@ -1,0 +1,79 @@
+﻿@using IdentityModel
+
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject NavigationManager _navManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Conventions.BackOffice</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <AuthorizeView Policy=@Policies.IsAdmin>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="login">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Sign in
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+            <Authorized>
+                <div class="nav-item px-3">
+                <NavLink class="nav-link" href="conventions">
+                    <span class="oi oi-plus" aria-hidden="true"></span> Conventions
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="venues">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Venues
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="events">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Events
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="users">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Users
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="signout">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Logout
+                </NavLink>
+            </div>
+            </Authorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private bool IsAuthenticated = false;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _authenticationStateProvider.AuthenticationStateChanged += async (task) =>
+        {
+            var state = await task;
+            IsAuthenticated = state?.User?.Identity?.IsAuthenticated ?? false;
+        };
+
+        var state = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        IsAuthenticated = state?.User?.Identity?.IsAuthenticated ?? false;
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}
